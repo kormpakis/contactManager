@@ -1,3 +1,9 @@
+#Contact Manager App (tutorial purpose)
+This is a project which implements a simple Contact Manager application.
+
+## Tools Used
+##`ReactJS`, `Ant Design Framework` and `Redux`. 
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
