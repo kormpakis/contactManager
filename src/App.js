@@ -1,37 +1,56 @@
 import React, {useState} from 'react';
 import "antd/dist/antd.css";
 import './App.css';
-import AddDrawer from "./Drawer";
+import EditContact from "./EditContact";
 import {Button, Layout, Table, Menu, Breadcrumb} from "antd";
-import {PlusCircleFilled, DeleteOutlined} from '@ant-design/icons'
+import {PlusCircleFilled, DeleteOutlined, EditOutlined} from '@ant-design/icons'
 import {DesktopOutlined, PieChartOutlined, FileOutlined, TeamOutlined, UserOutlined} from '@ant-design/icons';
 import {connect} from 'react-redux';
-import {addContact, deleteContact} from "./redux/contacts/actions";
+import {addContact, deleteContact, editContact} from "./redux/contacts/actions";
 
-const App = ({contacts, addContact, deleteContact}) => {
+const App = ({contacts, addContact, deleteContact, editContact}) => {
   const {Header, Content, Footer, Sider} = Layout;
   const {SubMenu} = Menu;
-
   const [showDrawer, setShowDrawer] = useState(false)
-  // const [values, setValues] = useState([])
   const [errorInfo, setErrorInfo] = useState({})
   const [formValid, setFormValid] = useState(false)
-
   const [collapsed, setCollapsed] = useState(false)
+  const [contact, setContact] = useState({firstName: '', lastName: '', phoneNumber: ''})
+  const [mode, setMode] = useState('add')
+  const [editKey, setEditKey] = useState(null)
+
+  const handleOnClose = () => {
+    setShowDrawer(false)
+    setContact({firstName: '', lastName: '', phoneNumber: ''})
+    setMode('add')
+    setEditKey()
+  }
 
   const onCollapse = collapsed => {
     setCollapsed(collapsed);
   }
 
-  const handleAddFormOnFinish = (data) => {
+  const handleAddFormOnFinish = data => {
     addContact({
       key: contacts.length + 1, ...data
     })
     setShowDrawer(false)
   }
 
-  const handleAddFormOnFinishFailed = (errorInfo) => {
+  const handleEditFormOnFinish = data => {
+    editContact({editKey,...data})
+    setShowDrawer(false)
+  }
+
+  const handleAddFormOnFinishFailed = errorInfo => {
     setErrorInfo(errorInfo)
+  }
+
+  const openEditDrawer = (contact, key) => {
+    setContact(contact)
+    setEditKey(key)
+    setMode('edit')
+    setShowDrawer(true)
   }
 
   const columns = [
@@ -53,9 +72,10 @@ const App = ({contacts, addContact, deleteContact}) => {
     {
       title: 'Delete',
       key: 'action',
-      render: (text, record) => (
+      render: (text, contact) => (
         <span>
-          <Button onClick={() => deleteContact(record.key)} type='danger' icon={<DeleteOutlined/>}/>
+          <Button onClick={() => deleteContact(contact.key)} type='danger' icon={<DeleteOutlined/>}/>
+          <Button onClick={() => openEditDrawer(contact, contact.key)} style={{marginLeft: 5}} icon={<EditOutlined/>}/>
         </span>
       )
     }
@@ -105,8 +125,11 @@ const App = ({contacts, addContact, deleteContact}) => {
               <Layout.Content>
                 <Table dataSource={contacts} columns={columns}/>
               </Layout.Content>
-              <AddDrawer show={showDrawer} handleOnClose={() => setShowDrawer(false)}
-                         handleOnFinish={handleAddFormOnFinish} handleOnFinishFailed={handleAddFormOnFinishFailed}/>
+
+                <EditContact show={showDrawer} handleOnClose={handleOnClose} mode={mode}
+                            handleEditOnFinish={handleEditFormOnFinish}
+                            handleOnFinish={handleAddFormOnFinish} handleOnFinishFailed={handleAddFormOnFinishFailed}
+                            initialValues={contact}/>
             </React.Fragment>
           </div>
         </Content>
@@ -124,8 +147,9 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    addContact: (contact) => dispatch(addContact(contact)),
-    deleteContact: (key) => dispatch(deleteContact(key))
+    addContact: contact => dispatch(addContact(contact)),
+    deleteContact: key => dispatch(deleteContact(key)),
+    editContact: contact => dispatch(editContact(contact))
   }
 }
 
