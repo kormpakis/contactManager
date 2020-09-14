@@ -3,12 +3,12 @@ import "antd/dist/antd.css";
 import './App.css';
 import AddDrawer from "./Drawer";
 import {Button, Layout, Table, Menu, Breadcrumb} from "antd";
-import {PlusCircleFilled} from '@ant-design/icons'
-import {DesktopOutlined, PieChartOutlined, FileOutlined, TeamOutlined, UserOutlined,} from '@ant-design/icons';
+import {PlusCircleFilled, DeleteOutlined} from '@ant-design/icons'
+import {DesktopOutlined, PieChartOutlined, FileOutlined, TeamOutlined, UserOutlined} from '@ant-design/icons';
 import {connect} from 'react-redux';
-import {addContact} from "./redux/contacts/actions";
+import {addContact, deleteContact} from "./redux/contacts/actions";
 
-const App = ({contacts, addContact}) => {
+const App = ({contacts, addContact, deleteContact}) => {
   const {Header, Content, Footer, Sider} = Layout;
   const {SubMenu} = Menu;
 
@@ -24,9 +24,6 @@ const App = ({contacts, addContact}) => {
   }
 
   const handleAddFormOnFinish = (data) => {
-    // setValues([...values, {
-    //   key: values.length + 1, ...data
-    // }])
     addContact({
       key: contacts.length + 1, ...data
     })
@@ -53,7 +50,17 @@ const App = ({contacts, addContact}) => {
       dataIndex: 'phoneNumber',
       key: 'phoneNumber'
     },
+    {
+      title: 'Delete',
+      key: 'action',
+      render: (text, record) => (
+        <span>
+          <Button onClick={() => deleteContact(record.key)} type='danger' icon={<DeleteOutlined/>}/>
+        </span>
+      )
+    }
   ]
+
   return (
     <Layout style={{minHeight: '100vh'}}>
       <Sider collapsible collapsed={collapsed} onCollapse={onCollapse}>
@@ -81,8 +88,8 @@ const App = ({contacts, addContact}) => {
         <Header style={{padding: 0, background: '#fff'}}/>
         <Content className="site-layout-background" style={{margin: '0 16px'}}>
           <Breadcrumb style={{margin: '16px 0'}}>
-            <Breadcrumb.Item>User</Breadcrumb.Item>
-            <Breadcrumb.Item>Bill</Breadcrumb.Item>
+            <Breadcrumb.Item>Contacts</Breadcrumb.Item>
+            <Breadcrumb.Item>Dashboard</Breadcrumb.Item>
           </Breadcrumb>
           <div className="site-layout-background" style={{padding: 24, minHeight: 360}}>
             <React.Fragment>
@@ -117,7 +124,8 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    addContact: (contact) => dispatch(addContact(contact))
+    addContact: (contact) => dispatch(addContact(contact)),
+    deleteContact: (key) => dispatch(deleteContact(key))
   }
 }
 
